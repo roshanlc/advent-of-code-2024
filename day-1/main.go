@@ -41,8 +41,36 @@ func main() {
 		total += diff
 	}
 
-	fmt.Println("Total difference: ", total)
+	fmt.Println("[Part 1]Total difference: ", total)
 	// Total difference: 1882714
+
+	// part two as follows
+
+	// sort the first location ids
+	visited := map[int]bool{}
+
+	score := 0
+
+	for _, first := range firstIDs {
+
+		if _, exists := visited[first]; exists {
+			continue
+		}
+
+		count := 0
+		for _, second := range secondIDs {
+			if first == second {
+				count++
+			}
+		}
+
+		// add up the score
+		score += (first * count)
+		// set visited to true for the current item
+		visited[first] = true
+	}
+
+	fmt.Println("[Part two]Score :", score)
 }
 
 // getLocationIDs scans the content of file
