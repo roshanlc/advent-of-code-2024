@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -38,9 +39,34 @@ func main() {
 		log.Fatal(err)
 	}
 
-	part1 := firstPart(fPairs, sPairs)
-	fmt.Println("[Part 1] Total:", part1)
+	// custom sorting function based on first input section
+	cmp := func(a, b int) int {
+		for _, p := range fPairs {
+			if p.First == a && p.Second == b {
+				return -1
+			}
+		}
+		return 0
+	}
 
+	// loop through second input section
+	run := func(sorted bool) int {
+		midTotal := 0
+		for _, s := range sPairs {
+			if slices.IsSortedFunc(s, cmp) == sorted {
+				slices.SortFunc(s, cmp)
+				midTotal += s[len(s)/2]
+			}
+		}
+
+		return midTotal
+	}
+
+	part1 := run(true)
+	part2 := run(false)
+
+	fmt.Println("[Part 1] Total:", part1)
+	fmt.Println("[Part 2] Total:", part2)
 }
 
 func extractFirstPairs(fileContents string) ([]Pair, error) {
@@ -93,37 +119,43 @@ func extractSecondPairs(fileContents string) ([][]int, error) {
 	return pairs, nil
 }
 
+// old solution
 func firstPart(fPairs []Pair, sPairs [][]int) int {
 	midTotal := 0
 	for _, sPair := range sPairs {
-		// prepare pairs
-		p := [][]int{}
-		for id := range sPair {
-			for j := id + 1; j < len(sPair); j++ {
-				p = append(p, []int{sPair[id], sPair[j]})
-			}
-		}
-		// loop through pairs and check if pair exists or not
-		exists := false
-		for _, pair := range p {
-			temp := false
-			for _, fPair := range fPairs {
-				if fPair.First == pair[0] && fPair.Second == pair[1] {
-					temp = true
-					break
-				}
-			}
-			if !temp {
-				exists = false
-				break
-			}
-			exists = true
-		}
-
-		if exists {
+		if isValidPair(fPairs, sPair) {
 			mid := sPair[len(sPair)/2]
 			midTotal += mid
 		}
 	}
 	return midTotal
+}
+
+// old solution
+func isValidPair(fPairs []Pair, sPair []int) bool {
+	var isValid bool
+	// prepare pairs
+	p := [][]int{}
+	for id := range sPair {
+		for j := id + 1; j < len(sPair); j++ {
+			p = append(p, []int{sPair[id], sPair[j]})
+		}
+	}
+
+	for _, pair := range p {
+		temp := false
+		for _, fPair := range fPairs {
+			if fPair.First == pair[0] && fPair.Second == pair[1] {
+				temp = true
+				break
+			}
+		}
+		if !temp {
+			isValid = false
+			break
+		}
+		isValid = true
+	}
+
+	return isValid
 }
