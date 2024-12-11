@@ -25,6 +25,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer file.Close()
 	lines, err := getHLines(file)
 	if err != nil {
 		log.Fatal(err)
